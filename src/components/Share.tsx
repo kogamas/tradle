@@ -101,11 +101,7 @@ export function Share({
         <div className="flex justify-center items-center mb-6">
           <div className="space-x-4">
             <CopyToClipboard
-              text={[
-                title,
-                guessesString,
-                "https://oec.world/en/games/tradle",
-              ].join("\n")}
+              text={[title, guessesString].join("\n")}
               onCopy={() => toast(t("copy"))}
               options={{
                 format: "text/plain",
@@ -115,26 +111,6 @@ export function Share({
                 {t("share")}
               </button>
             </CopyToClipboard>
-          </div>
-        </div>
-        <div className="flex justify-center items-center">
-          <div className="space-x-4">
-            <a
-              href="https://oec.world/en/games/connectrade"
-              className="p-2 px-4 rounded-lg font-semibold text-white bg-gray-400 hover:bg-gray-600 inline-block"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Play ConnecTrade
-            </a>
-            <a
-              href="https://oec.world/en/games/pick-5"
-              className="p-2 px-4 rounded-lg font-semibold text-white bg-gray-400 hover:bg-gray-600 inline-block"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Play Pick 5
-            </a>
           </div>
         </div>
         <br />

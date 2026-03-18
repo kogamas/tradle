@@ -11,7 +11,6 @@ import {
 import { Guess } from "../domain/guess";
 import React from "react";
 import { SettingsData } from "../hooks/useSettings";
-import AdSense from "./Adsense";
 
 const START_DATE = DateTime.fromISO("2022-03-06");
 
@@ -139,9 +138,6 @@ export function Share({
           </div>
         </div>
         <br />
-        <div className="flex justify-center items-center">
-          <AdSense />
-        </div>
       </Modal>
       <CopyToClipboard
         text={[title, guessesString, "https://oec.world/en/games/tradle"].join(

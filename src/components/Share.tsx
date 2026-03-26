@@ -116,9 +116,7 @@ export function Share({
         <br />
       </Modal>
       <CopyToClipboard
-        text={[title, guessesString, "https://oec.world/en/games/tradle"].join(
-          "\n"
-        )}
+        text={[title, guessesString].join("\n")}
         onCopy={() => toast(t("copy"))}
         options={{
           format: "text/plain",

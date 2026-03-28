@@ -4,7 +4,7 @@
 import { flag } from "country-emoji";
 import i18n from "../i18n";
 
-const countryCodesWithImage = [
+const countryCodesWithImage = new Set([
   "ad",
   "ao",
   "ax",
@@ -251,7 +251,7 @@ const countryCodesWithImage = [
   "mh",
   "fm",
   "mp",
-];
+]);
 
 export interface Country {
   code: string;
@@ -908,112 +908,8 @@ export const countries: Country[] = [
   },
 ];
 
-export const fictionalCountries: Country[] = [
-  { code: "AA", latitude: 12.546245, longitude: 1.601554, name: "Atlantis" },
-  {
-    code: "AB",
-    latitude: 12.546245,
-    longitude: 1.601554,
-    name: "Central City",
-  },
-  {
-    code: "AC",
-    latitude: 12.546245,
-    longitude: 1.601554,
-    name: "Cerulean City",
-  },
-  {
-    code: "AD",
-    latitude: 12.546245,
-    longitude: 1.601554,
-    name: "Deepheart Valley",
-  },
-  {
-    code: "AE",
-    latitude: 12.546245,
-    longitude: 1.601554,
-    name: "Friendship Island",
-  },
-  { code: "AF", latitude: 12.546245, longitude: 1.601554, name: "Gallifrey" },
-  { code: "AG", latitude: 12.546245, longitude: 1.601554, name: "Gotham" },
-  {
-    code: "AH",
-    latitude: 12.546245,
-    longitude: 1.601554,
-    name: "Green Hills",
-  },
-  {
-    code: "AI",
-    latitude: 12.546245,
-    longitude: 1.601554,
-    name: "Hill Valley",
-  },
-  { code: "AJ", latitude: 42.546245, longitude: 1.601554, name: "Land of Oz" },
-  {
-    code: "AK",
-    latitude: 12.546245,
-    longitude: 1.601554,
-    name: "Liberty City",
-  },
-  { code: "AL", latitude: 12.546245, longitude: 1.601554, name: "Metropolis" },
-  { code: "AM", latitude: 12.546245, longitude: 1.601554, name: "Mos Eisley" },
-  {
-    code: "AN",
-    latitude: 12.546245,
-    longitude: 1.601554,
-    name: "Mushroom Kingdom",
-  },
-  { code: "AO", latitude: 12.546245, longitude: 1.601554, name: "Narnia" },
-  {
-    code: "AP",
-    latitude: 12.546245,
-    longitude: 1.601554,
-    name: "Pelotillehue",
-  },
-  {
-    code: "AQ",
-    latitude: 12.546245,
-    longitude: 1.601554,
-    name: "Phantom Island",
-  },
-  {
-    code: "AR",
-    latitude: 12.546245,
-    longitude: 1.601554,
-    name: "Pleasantville",
-  },
-  {
-    code: "AS",
-    latitude: 12.546245,
-    longitude: 1.601554,
-    name: "Raccoon City",
-  },
-  {
-    code: "AT",
-    latitude: 12.546245,
-    longitude: 1.601554,
-    name: "San Andreas",
-  },
-  { code: "AU", latitude: 12.546245, longitude: 1.601554, name: "Smallville" },
-  {
-    code: "AV",
-    latitude: 12.546245,
-    longitude: 1.601554,
-    name: "Springfield",
-  },
-  { code: "AW", latitude: 12.546245, longitude: 1.601554, name: "The Shire" },
-  { code: "AX", latitude: 12.546245, longitude: 1.601554, name: "Twin Peaks" },
-  { code: "AY", latitude: 12.546245, longitude: 1.601554, name: "Vice City" },
-  { code: "AZ", latitude: 12.546245, longitude: 1.601554, name: "Wakanda" },
-  { code: "BA", latitude: 12.546245, longitude: 1.601554, name: "Westeros" },
-  { code: "BB", latitude: 12.546245, longitude: 1.601554, name: "Westview" },
-  { code: "BC", latitude: 12.546245, longitude: 1.601554, name: "Westworld" },
-  { code: "BD", latitude: 12.546245, longitude: 1.601554, name: "Winterfell" },
-  { code: "BE", latitude: 12.546245, longitude: 1.601554, name: "Zion" },
-];
-
 export const countriesWithImage = countries.filter((c) =>
-  countryCodesWithImage.includes(c.code.toLowerCase())
+  countryCodesWithImage.has(c.code.toLowerCase())
 );
 
 export function getCountryName(language: string, country: Country | undefined) {
@@ -1024,8 +920,8 @@ export function sanitizeCountryName(countryName: string | undefined): string {
   return countryName
     ? countryName
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[- '()]/g, "")
+        .replaceAll(/[\u0300-\u036f]/g, "")
+        .replaceAll(/[- '()]/g, "")
         .toLowerCase()
     : "";
 }
@@ -1287,19 +1183,13 @@ export const countryISOMapping: Iso = {
   XK: "XKX",
 };
 
-export function getCountryPrettyName(
-  str: string | undefined,
-  isAprilFools = false
-): string {
-  const items = isAprilFools ? fictionalCountries : countries;
+export function getCountryPrettyName(str: string | undefined): string {
   if (str) {
-    const country = items.find(
+    const country = countries.find(
       (c) => sanitizeCountryName(c.name.toLowerCase()) === str
     );
     if (country) {
-      return isAprilFools
-        ? `${country.name}`
-        : flag(country?.code)
+      return flag(country?.code)
         ? `${flag(country?.code)} ${country.name}`
         : `${country.name}`;
     }
@@ -1309,16 +1199,6 @@ export function getCountryPrettyName(
 
 export function getCountryByName(countryName: string): Country | undefined {
   return countries.find(
-    (country) =>
-      sanitizeCountryName(getCountryName(i18n.resolvedLanguage, country)) ===
-      sanitizeCountryName(countryName)
-  );
-}
-
-export function getFictionalCountryByName(
-  countryName: string
-): Country | undefined {
-  return fictionalCountries.find(
     (country) =>
       sanitizeCountryName(getCountryName(i18n.resolvedLanguage, country)) ===
       sanitizeCountryName(countryName)

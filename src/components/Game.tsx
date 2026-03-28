@@ -10,7 +10,6 @@ import { toast } from "react-toastify";
 import {
   getCountryName,
   countryISOMapping,
-  getFictionalCountryByName,
   getCountryByName,
 } from "../domain/countries";
 import { getCompassDirection } from "../domain/geography";
@@ -59,7 +58,6 @@ interface GameProps {
 export function Game({ settingsData }: GameProps) {
   const { t, i18n } = useTranslation();
   const dayString = useMemo(getDayString, []);
-  const isAprilFools = dayString.endsWith("04-01");
 
   // Add a check to see if we're using a historical date
   const isHistoricalPuzzle = useMemo(() => {
@@ -74,16 +72,7 @@ export function Game({ settingsData }: GameProps) {
   const session: OECSession = useOECSession();
 
   const countryData = useCountry(`${dayString}`);
-  let country = countryData[0];
-
-  if (isAprilFools) {
-    country = {
-      code: "AJ",
-      latitude: 42.546245,
-      longitude: 1.601554,
-      name: "Land of Oz",
-    };
-  }
+  const country = countryData[0];
 
   const [ipData, setIpData] = useState(null);
   const [currentGuess, setCurrentGuess] = useState<string>("");
@@ -153,9 +142,7 @@ export function Game({ settingsData }: GameProps) {
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (!country) return;
-      const guessedCountry = isAprilFools
-        ? getFictionalCountryByName(currentGuess)
-        : getCountryByName(currentGuess);
+      const guessedCountry = getCountryByName(currentGuess);
 
       if (guessedCountry == null) {
         toast.error(t("unknownCountry"));
@@ -182,7 +169,7 @@ export function Game({ settingsData }: GameProps) {
         saveScore(newGuesses, newWon);
       }
     },
-    [addGuess, country, currentGuess, t, isAprilFools, saveScore]
+    [addGuess, country, currentGuess, t, saveScore]
   );
 
   useEffect(() => {
@@ -202,18 +189,16 @@ export function Game({ settingsData }: GameProps) {
     }
   }, [country, guesses, i18n.resolvedLanguage]);
 
-  let iframeSrc = "https://games.oec.world/en/tradle/aprilfools.html";
-  let oecLink = "https://oec.world/";
   const country3LetterCode = country?.code
     ? countryISOMapping[country.code]?.toLowerCase()
     : "";
-  if (!isAprilFools) {
-    const oecCode = country?.oecCode
-      ? country?.oecCode?.toLowerCase()
-      : country3LetterCode;
-    iframeSrc = `https://oec.world/en/visualize/embed/tree_map/hs92/export/${oecCode}/all/show/2023/?controls=false&title=false&click=false`;
-    oecLink = `https://oec.world/en/profile/country/${country3LetterCode}`;
-  }
+
+  const oecCode = country?.oecCode
+    ? country?.oecCode?.toLowerCase()
+    : country3LetterCode;
+
+  const finalIframeSrc = `https://oec.world/en/visualize/embed/tree_map/hs92/export/${oecCode}/all/show/2023/?controls=false&title=false&click=false`;
+  const finalOecLink = `https://oec.world/en/profile/country/${country3LetterCode}`;
 
   return (
     <div className="flex-grow flex flex-col mx-2 relative">
@@ -243,7 +228,7 @@ export function Game({ settingsData }: GameProps) {
         country exports these products!
       </h2>
       <div className="relative h-0 pt-[25px] pb-96 md:pb-[70%]">
-        {country3LetterCode || isAprilFools ? (
+        {country3LetterCode ? (
           <iframe
             style={{
               position: "absolute",
@@ -255,7 +240,7 @@ export function Game({ settingsData }: GameProps) {
             title="Country to guess"
             width="390"
             height="315"
-            src={iframeSrc}
+            src={finalIframeSrc}
             frameBorder="0"
           />
         ) : null}
@@ -274,7 +259,6 @@ export function Game({ settingsData }: GameProps) {
         guesses={guesses}
         settingsData={settingsData}
         countryInputRef={countryInputRef}
-        isAprilFools={isAprilFools}
       />
       <div className="my-2">
         {gameEnded ? (
@@ -286,11 +270,10 @@ export function Game({ settingsData }: GameProps) {
               hideImageMode={hideImageMode}
               rotationMode={rotationMode}
               won={guesses[guesses.length - 1]?.distance === 0}
-              isAprilFools={isAprilFools}
             />
             <a
-              className="underline w-full text-center block mt-4 flex justify-center"
-              href={oecLink}
+              className="underline w-full text-center mt-4 flex justify-center"
+              href={finalOecLink}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -310,13 +293,6 @@ export function Game({ settingsData }: GameProps) {
               </svg>
               {t("showOnGoogleMaps")}
             </a>
-            {isAprilFools ? (
-              <div className="w-full text-center block mt-4 flex flex-col justify-center text-2xl font-bold">
-                <div>🐶 🚲 🌪 🏚</div>
-                <div>Happy April Fools!</div>
-                <div>👠 🤖 🦁 🎍</div>
-              </div>
-            ) : null}
           </>
         ) : (
           <form onSubmit={handleSubmit}>
@@ -325,7 +301,6 @@ export function Game({ settingsData }: GameProps) {
                 countryValue={countryValue}
                 setCountryValue={setCountryValue}
                 setCurrentGuess={setCurrentGuess}
-                isAprilFools={isAprilFools}
               />
               {/* <button
                 className="border-2 uppercase my-0.5 hover:bg-gray-50 active:bg-gray-100 dark:hover:bg-slate-800 dark:active:bg-slate-700"
@@ -335,7 +310,7 @@ export function Game({ settingsData }: GameProps) {
               </button> */}
               <div className="text-left">
                 <button className="my-2 inline-block justify-end bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded items-center">
-                  {isAprilFools ? "🪄" : "🌍"} <span>Guess</span>
+                  🌍 <span>Guess</span>
                 </button>
               </div>
             </div>

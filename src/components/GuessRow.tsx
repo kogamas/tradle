@@ -21,36 +21,29 @@ const DIRECTION_ARROWS: Record<Direction, string> = {
   NW: "↖️",
 };
 
-const DIRECTION_ARROWS_APRIL_FOOLS: Record<number, string> = {
-  0: "🐶",
-  1: "🌪",
-  2: "🏚",
-  3: "🚲",
-  4: "👠",
-  5: "🦁",
-  6: "🤖",
-};
-
 const SQUARE_ANIMATION_LENGTH = 250;
 type AnimationState = "NOT_STARTED" | "RUNNING" | "ENDED";
 
-interface GuessRowProps {
-  index: number;
-  guess?: Guess;
-  settingsData: SettingsData;
-  countryInputRef?: React.RefObject<HTMLInputElement>;
-  isAprilFools?: boolean;
+function getDirectionOrCelebration(guess: Guess | undefined): string | null {
+  if (!guess) {
+    return null;
+  }
+  if (guess.distance === 0) {
+    return "🎉";
+  }
+  return DIRECTION_ARROWS[guess.direction];
 }
 
-export function GuessRow({
-  index,
-  guess,
-  settingsData,
-  countryInputRef,
-  isAprilFools = false,
-}: GuessRowProps) {
+interface GuessRowProps {
+  readonly guess?: Guess;
+  readonly settingsData: SettingsData;
+  readonly countryInputRef?: React.RefObject<HTMLInputElement>;
+}
+
+export function GuessRow(props: Readonly<GuessRowProps>): JSX.Element {
+  const { guess, settingsData, countryInputRef } = props;
   const { distanceUnit, theme } = settingsData;
-  const proximity = guess != null ? computeProximityPercent(guess.distance) : 0;
+  const proximity = guess == null ? 0 : computeProximityPercent(guess.distance);
   const squares = generateSquareCharacters(proximity, theme);
 
   const [animationState, setAnimationState] =
@@ -80,9 +73,10 @@ export function GuessRow({
   switch (animationState) {
     case "NOT_STARTED":
       return (
-        <div
+        <button
           onClick={handleClickOnEmptyRow}
-          className={`bg-stone-200 rounded-lg my-1 col-span-7 h-8 bg-gray-200`}
+          className="bg-gray-200 rounded-lg my-1 col-span-7 h-8 border-0"
+          type="button"
         />
       );
     case "RUNNING":
@@ -91,12 +85,12 @@ export function GuessRow({
           <div
             className={`flex text-2xl w-full justify-evenly items-center col-span-6 border-2 h-8`}
           >
-            {squares.map((character, index) => (
+            {squares.map((character, charIndex) => (
               <div
-                key={index}
+                key={`${charIndex}-${character}`}
                 className="opacity-0 animate-reveal"
                 style={{
-                  animationDelay: `${SQUARE_ANIMATION_LENGTH * index}ms`,
+                  animationDelay: `${SQUARE_ANIMATION_LENGTH * charIndex}ms`,
                 }}
               >
                 {character}
@@ -105,7 +99,7 @@ export function GuessRow({
           </div>
           <div className="border-2 h-8 col-span-1 animate-reveal">
             <CountUp
-              end={isAprilFools ? 100 : proximity}
+              end={proximity}
               suffix="%"
               duration={(SQUARE_ANIMATION_LENGTH * 5) / 1000}
             />
@@ -129,49 +123,30 @@ export function GuessRow({
             style={countrySectionStyle}
           >
             <p className="text-ellipsis overflow-hidden whitespace-nowrap">
-              {getCountryPrettyName(guess?.name, isAprilFools)}
+              {getCountryPrettyName(guess?.name)}
             </p>
             <p>
-              {guess?.country !== undefined ? (
-                isAprilFools ? (
-                  <span className="h-5 w-5">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                      />
-                    </svg>
-                  </span>
-                ) : (
-                  <a
-                    href={constructOecLink(guess?.country)}
-                    target="_blank"
-                    rel="noopener noreferrer"
+              {guess?.country ? (
+                <a
+                  href={constructOecLink(guess.country)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                      />
-                    </svg>
-                  </a>
-                )
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                    />
+                  </svg>
+                </a>
               ) : null}
             </p>
           </div>
@@ -182,11 +157,7 @@ export function GuessRow({
                 : "bg-gray-200 rounded-lg flex items-center justify-center h-8 col-span-2 animate-reveal"
             }
           >
-            {guess && isAprilFools
-              ? "⁇"
-              : guess
-              ? formatDistance(guess.distance, distanceUnit)
-              : null}
+            {guess ? formatDistance(guess.distance, distanceUnit) : null}
           </div>
           <div
             className={
@@ -195,24 +166,16 @@ export function GuessRow({
                 : "bg-gray-200 rounded-lg flex items-center justify-center h-8 col-span-1 animate-reveal"
             }
           >
-            {guess?.distance === 0
-              ? "🎉"
-              : guess && isAprilFools
-              ? "⁇"
-              : guess
-              ? DIRECTION_ARROWS[guess.direction]
-              : null}
+            {getDirectionOrCelebration(guess)}
           </div>
           <div
             className={
               guess?.distance === 0
-                ? "bg-oec-yellow rounded-lg flex items-center justify-center h-8 col-span-1 animate-reveal animate-pop"
-                : "bg-gray-200 rounded-lg flex items-center justify-center h-8 col-span-1 animate-reveal animate-pop"
+                ? "bg-oec-yellow rounded-lg flex items-center justify-center h-8 col-span-1 animate-reveal"
+                : "bg-gray-200 rounded-lg flex items-center justify-center h-8 col-span-1 animate-reveal"
             }
           >
-            {isAprilFools
-              ? DIRECTION_ARROWS_APRIL_FOOLS[index]
-              : `${proximity}%`}
+            {`${proximity}%`}
           </div>
         </>
       );

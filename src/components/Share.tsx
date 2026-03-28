@@ -21,7 +21,6 @@ interface ShareProps {
   hideImageMode: boolean;
   rotationMode: boolean;
   won: boolean;
-  isAprilFools?: boolean;
 }
 
 export function Share({
@@ -31,7 +30,6 @@ export function Share({
   hideImageMode,
   rotationMode,
   won,
-  isAprilFools = false,
 }: ShareProps) {
   const { t } = useTranslation();
   const { theme } = settingsData;
@@ -50,9 +48,7 @@ export function Share({
       : rotationMode
       ? " 🌀"
       : "";
-    const title = isAprilFools
-      ? `#Tradle #AprilFoolsDay #${dayCount} ${guessCount}/6${difficultyModifierEmoji}`
-      : `#Tradle #${dayCount} ${guessCount}/6${difficultyModifierEmoji}`;
+    const title = `#Tradle #${dayCount} ${guessCount}/6${difficultyModifierEmoji}`;
 
     const guessesEmoji = guesses.map((guess) => {
       const percent = computeProximityPercent(guess.distance);
@@ -62,7 +58,7 @@ export function Share({
     const guessesString = guessesEmoji.join("\n");
 
     return [title, guessesEmoji, guessesString];
-  }, [dayCount, guesses, hideImageMode, rotationMode, theme, isAprilFools]);
+  }, [dayCount, guesses, hideImageMode, rotationMode, theme]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -107,7 +103,7 @@ export function Share({
                 format: "text/plain",
               }}
             >
-              <button className="p-2 mt-4 rounded-lg font-semibold text-white bg-oec-orange hover:bg-oec-yellow active:bg-oec-orange text-white">
+              <button className="p-2 mt-4 rounded-lg font-semibold text-white bg-oec-orange hover:bg-oec-yellow active:bg-oec-orange">
                 {t("share")}
               </button>
             </CopyToClipboard>

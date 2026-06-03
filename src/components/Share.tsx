@@ -14,6 +14,8 @@ import { SettingsData } from "../hooks/useSettings";
 
 const START_DATE = DateTime.fromISO("2022-03-06");
 
+const GAME_LINK = "[Tradle](https://kogamas.github.io/tradle/)";
+
 interface ShareProps {
   guesses: Guess[];
   dayString: string;
@@ -97,7 +99,7 @@ export function Share({
         <div className="flex justify-center items-center mb-6">
           <div className="space-x-4">
             <CopyToClipboard
-              text={[title, guessesString].join("\n")}
+              text={[title, guessesString, GAME_LINK].join("\n")}
               onCopy={() => toast(t("copy"))}
               options={{
                 format: "text/plain",
@@ -112,7 +114,7 @@ export function Share({
         <br />
       </Modal>
       <CopyToClipboard
-        text={[title, guessesString].join("\n")}
+        text={[title, guessesString, GAME_LINK].join("\n")}
         onCopy={() => toast(t("copy"))}
         options={{
           format: "text/plain",
